@@ -96,6 +96,27 @@ class LabTester:
             message="Combined rotations about x, y, and z axes"
         )
 
+        # Test 5: Combined rotations
+        point = np.array([1, 2, 3])
+        translation = np.array([-1, -1, -1])
+        rotation = {'x': 90, 'y': 90, 'z': 90}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [2, -1, 0], decimal=3,
+            message="Rotations with Negative Translation"
+        )
+
+        # Test 6: Combined rotations
+        point = np.array([1, 2, 3])
+        translation = np.array([-5, 5, -1])
+        rotation = {'x': 60, 'y': 90, 'z': 30}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [2, -4, 7], decimal=3,
+            message="Rotations by odd angles with Translation"
+        )
+
+
     def test_chain_transformations(self, chain_transforms: Callable):
         """
         Test suite for chained transformation implementation
@@ -155,7 +176,20 @@ class LabTester:
             transformed, point,
             message="Chain of identity transformations"
         )
-    
+
+        # Test 5: Complex chains
+        point = np.array([1, 2, 3])
+        transforms = [
+            {'translation': np.array([1, 0, -1]), 'rotation': {'x': 45, 'y': 30, 'z': 60}},
+            {'translation': np.array([-1, 1, 0]), 'rotation': {'x': 135, 'y': 120, 'z': 30}},
+            {'translation': np.array([0, -1, 1]), 'rotation': {'x': -90, 'y': 60, 'z': 0}}
+        ]
+        transformed = chain_transforms(point, transforms)
+        self.assert_array_almost_equal(
+            transformed, [3.607, -2.068, 1.234], decimal=3,
+            message="Complex transformations"
+        )
+
     def print_summary(self):
         """Print summary of test results"""
         print(f"\n=== Test Summary ===")
