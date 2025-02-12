@@ -35,7 +35,7 @@
 .venv
 
 # Text files
-.txt
+*.txt
 
 # Solutions
 solution*.ipynb
