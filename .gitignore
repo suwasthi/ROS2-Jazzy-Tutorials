@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# Virtual Env
+.venv
+
+# Text files
+.txt
+
+# Solutions
+solution*.ipynb
