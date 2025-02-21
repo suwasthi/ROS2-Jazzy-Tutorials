@@ -45,6 +45,24 @@ class LabTester:
             transformed, [4, 6],
             message="Pure translation: no rotation"
         )
+        
+        #Test 3: Pure rotation 
+        point = np.array([1,1])
+        translation = np.array([0,0])
+        transformed = homogenous_transform_2D(point,translation, 30)
+        self.assert_array_almost_equal(
+            transformed, [0.366, 1.366], decimal=3,
+            message="Pure rotation: no translation"
+        )
+        
+        #Test 4: Rotate and translate
+        point = np.array([1,1])
+        translation = np.array([4,3])
+        transformed = homogenous_transform_2D(point,translation, 90)
+        self.assert_array_almost_equal(
+            transformed, [3, 4], decimal=0,
+            message="Translation and rotation"
+        )
 
     def test_homogeneous_transform_3d(self, homogenous_transform_3D: Callable):
         """
@@ -188,6 +206,18 @@ class LabTester:
         self.assert_array_almost_equal(
             transformed, [1.8308927, -0.38874408, -2.0454028], decimal=3,
             message="Complex transformations"
+        )
+        
+        #Test 6: 
+        point = np.array([1,1,1])
+        transforms = [
+            {'translation': np.array([1,1,1]),'rotation':{'x':45,'y':45,'z': 45}},
+            {'translation':np.array([-1,-1,-1]),'rotation':{'x':-45,'y':-45,'z': -45}}
+        ]
+        transformed = chain_transforms(point, transforms)
+        self.assert_array_almost_equal(
+            transformed, [-1.16421356, 1.28033009, 1.48743687], decimal=4,
+            message="Tranform * Reverse transform"
         )
 
     def print_summary(self):
