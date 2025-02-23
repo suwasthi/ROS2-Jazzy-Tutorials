@@ -64,6 +64,42 @@ class LabTester:
             message="Translation and rotation"
         )
 
+        # Test 3: Pure rotation
+        point = np.array([1, 0])
+        translation = np.array([0, 0])
+        transformed = homogenous_transform_2D(point, translation, 90)
+        self.assert_array_almost_equal(
+            transformed, [0, 1],
+            message="Pure rotation: no translation"
+        )
+
+        # Test 4: Combined rotation and translation
+        point = np.array([1, 0])
+        translation = np.array([2.25, 3.75])
+        transformed = homogenous_transform_2D(point, translation, 90)
+        self.assert_array_almost_equal(
+            transformed, [2.250, 4.750], decimal=3,
+            message="Combined rotation and translation"
+        )
+
+        # Test 5: Combined rotation and translation
+        point = np.array([4, 3])
+        translation = np.array([2, 3])
+        transformed = homogenous_transform_2D(point, translation, 45)
+        self.assert_array_almost_equal(
+            transformed, [2.7071, 7.9498], decimal=3,
+            message="Combined rotation and translation"
+        )
+
+        # Test 6: Combined rotation and translation far from origin
+        point = np.array([10, 15])
+        translation = np.array([100, 150])
+        transformed = homogenous_transform_2D(point, translation, 60)
+        self.assert_array_almost_equal(
+            transformed, [ 92.00962, 166.16025], decimal=3,
+            message="Combined rotation and translation"
+        )
+
     def test_homogeneous_transform_3d(self, homogenous_transform_3D: Callable):
         """
         Test suite for 3D homogeneous transformation implementation
@@ -134,6 +170,55 @@ class LabTester:
             message="Rotations by odd angles with Translation"
         )
 
+        # Test 7: Combined rotations
+        point = np.array([1, 2, 3])
+        translation = np.array([0, 0, 0])
+        rotation = {'x': 45, 'y': 30, 'z': 60}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [0.43301, -0.95323,  3.59219], decimal=3,
+            message="Combined rotations about x, y, and z axes"
+        )
+
+        # Test 8: Combined rotations
+        point = np.array([1, 2, 3])
+        translation = np.array([1, 1, 1])
+        rotation = {'x': 45, 'y': 60, 'z': 30}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [3.53109, 1.4356 , 3.721], decimal=3,
+            message="Combined rotations about x, y, and z axes with translation"
+        )
+
+        # Test 9: Combined rotations far from origin
+        point = np.array([10, 15, 20])
+        translation = np.array([100, 150, 200])
+        rotation = {'x': 45, 'y': 60, 'z': 30}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [117.90064, 156.36056, 219.08168], decimal=3,
+            message="Combined rotations about x, y, and z axes with translation"
+        )
+
+        # Test 10: Pure rotations of big angles
+        point = np.array([1, 0, 1])
+        translation = np.array([0, 0, 0])
+        rotation = {'x': 120, 'y': 150, 'z': 250}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [0.7962 ,  1.07175, -0.46629], decimal=3,
+            message="Pure rotations of big angles"
+        )
+
+        # Test 11: Combined rotations about negative angles with translation
+        point = np.array([1, 0, 0])
+        translation = np.array([1, 1, 1])
+        rotation = {'x': -45, 'y': -60, 'z': -30}
+        transformed = homogenous_transform_3D(point, translation, rotation)
+        self.assert_array_almost_equal(
+            transformed, [1.43301, 1.17678, 1.88388], decimal=3,
+            message="Combined rotations about negative x, y, and z axes with translation"
+        )
 
     def test_chain_transformations(self, chain_transforms: Callable):
         """
@@ -218,6 +303,51 @@ class LabTester:
         self.assert_array_almost_equal(
             transformed, [-1.16421356, 1.28033009, 1.48743687], decimal=4,
             message="Tranform * Reverse transform"
+        )
+
+        # Test 6: Complex chains
+        point = np.array([1, 2, 3])
+        transforms = [
+            {'translation': np.array([1, 0, -1]), 'rotation': {'x': 45, 'y': 30, 'z': 60}},
+            {'translation': np.array([-1, 1, 0]), 'rotation': {'x': 135, 'y': 120, 'z': 30}},
+            {'translation': np.array([0, -1, 1]), 'rotation': {'x': -90, 'y': 60, 'z': 0}},
+            {'translation': np.array([1, 1, 1]), 'rotation': {'x': 90, 'y': 90, 'z': 90}},
+            {'translation': np.array([1, 1, 0]), 'rotation': {'x': 135, 'y': 120, 'z': 30}},
+            {'translation': np.array([0, 1, -1]), 'rotation': {'x': -90, 'y': 60, 'z': 0}},
+        ]
+        transformed = chain_transforms(point, transforms)
+        self.assert_array_almost_equal(
+            transformed, [2.56055, -2.43085, -1.54043], decimal=3,
+            message="Complex transformations with additional transform"
+        )
+
+        # Test 7: Complex chains
+        point = np.array([4,5,6])
+        transforms = [
+            {'translation': np.array([1, 0, -1]), 'rotation': {'x': 150, 'y': 130, 'z': 220}},
+            {'translation': np.array([-1, 1, 0]), 'rotation': {'x': 135, 'y': 120, 'z': 90}},
+            {'translation': np.array([0, -1, 1]), 'rotation': {'x': 120, 'y': 270, 'z': 110}},
+        ]
+        transformed = chain_transforms(point, transforms)
+        self.assert_array_almost_equal(
+            transformed, [0.99092, -9.01667,  1.72435], decimal=3,
+            message="Complex transformations with big angles"
+        )
+
+        # Test 8: Complex chains
+        point = np.array([3, 6, 9])
+        transforms = [
+            {'translation': np.array([1, 0, -1]), 'rotation': {'x': -45, 'y': 30, 'z': -60}},
+            {'translation': np.array([-1, 1, 0]), 'rotation': {'x': -60, 'y': -30, 'z': -90}},
+            {'translation': np.array([0, -1, 1]), 'rotation': {'x': -45, 'y': 30, 'z': -30}},
+            {'translation': np.array([1, 1, 1]), 'rotation': {'x': 45, 'y': -60, 'z': -45}},
+            {'translation': np.array([1, 1, 0]), 'rotation': {'x': -30, 'y': 60, 'z': 30}},
+            {'translation': np.array([0, 1, -1]), 'rotation': {'x': -45, 'y': 30, 'z': -30}},
+        ]
+        transformed = chain_transforms(point, transforms)
+        self.assert_array_almost_equal(
+            transformed, [2.56055, -2.43085, -1.54043], decimal=3,
+            message="Complex transformations with nagative angles and additional transform"
         )
 
     def print_summary(self):
